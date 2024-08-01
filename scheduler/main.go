@@ -14,6 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // -------------------------------------------------------------------------------------------
+// This Go program sets up a scheduler that runs two concurrent tasks 
+// (monitorUnscheduledPods and reconcileUnscheduledPods) and handles system 
+// termination signals to shut down gracefully. It uses channels and a WaitGroup 
+// to manage the lifecycle of these tasks and ensure the program exits cleanly.
 
 package main
 
