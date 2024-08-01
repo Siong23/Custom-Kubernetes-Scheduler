@@ -46,7 +46,7 @@ func postEvent(event Event) error {
 	if err != nil {
 		return err
 	}
-
+	
 	request := &http.Request{
 		Body:          ioutil.NopCloser(body),
 		ContentLength: int64(body.Len()),
@@ -101,9 +101,12 @@ func watchUnscheduledPods() (<-chan Pod, <-chan error) {
 	pods := make(chan Pod)
 	errc := make(chan error, 1)
 
+	// Sets up URL query parameters to filter pods that do not have a node assigned (spec.nodeName= is empty, meaning no node is assigned).
 	v := url.Values{}
 	v.Set("fieldSelector", "spec.nodeName=")
 
+	// Creates an HTTP GET request to the endpoint specified by apiHost and watchPodsEndpoint, 
+	// with the constructed query parameters and an Accept header indicating that JSON responses are expected.
 	request := &http.Request{
 		Header: make(http.Header),
 		Method: http.MethodGet,
@@ -118,6 +121,7 @@ func watchUnscheduledPods() (<-chan Pod, <-chan error) {
 
 	go func() {
 		for {
+			// Makes an HTTP request to the specified endpoint.
 			resp, err := http.DefaultClient.Do(request)
 			if err != nil {
 				errc <- err
@@ -139,7 +143,7 @@ func watchUnscheduledPods() (<-chan Pod, <-chan error) {
 					errc <- err
 					break
 				}
-
+				// If an event of type "ADDED" is received, it sends the Pod object to the pods channel.
 				if event.Type == "ADDED" {
 					pods <- event.Object
 				}
@@ -154,9 +158,11 @@ func getUnscheduledPods() ([]*Pod, error) {
 	var podList PodList
 	unscheduledPods := make([]*Pod, 0)
 
+	// Sets up URL query parameters to filter pods that do not have a node assigned (spec.nodeName= is empty, meaning no node is assigned).
 	v := url.Values{}
 	v.Set("fieldSelector", "spec.nodeName=")
 
+	// makes an HTTP GET request to an API endpoint for pods, filtering based on spec.nodeName to get only unscheduled pods.
 	request := &http.Request{
 		Header: make(http.Header),
 		Method: http.MethodGet,
@@ -178,6 +184,8 @@ func getUnscheduledPods() ([]*Pod, error) {
 		return unscheduledPods, err
 	}
 
+	// Iterates through the list of pods (podList.Items).
+	// Checks if the pod's annotations match the schedulerName. If they do, the pod is added to the unscheduledPods slice.
 	for _, pod := range podList.Items {
 		if pod.Metadata.Annotations["scheduler.alpha.kubernetes.io/name"] == schedulerName {
 			unscheduledPods = append(unscheduledPods, &pod)
