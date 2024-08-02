@@ -230,21 +230,24 @@ type ResourceUsage struct {
 }
 
 func fit(pod *Pod) ([]Node, error) {
+	// Retrieve Nodes
 	nodeList, err := getNodes()
 	if err != nil {
 		return nil, err
 	}
-
+	// Retrieve pods
 	podList, err := getPods()
 	if err != nil {
 		return nil, err
 	}
 
+	// Initialize Resource Usage Tracking
 	resourceUsage := make(map[string]*ResourceUsage)
 	for _, node := range nodeList.Items {
 		resourceUsage[node.Metadata.Name] = &ResourceUsage{}
 	}
 
+	// 
 	for _, p := range podList.Items {
 		if p.Spec.NodeName == "" {
 			continue
