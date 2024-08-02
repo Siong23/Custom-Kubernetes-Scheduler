@@ -341,6 +341,7 @@ func fit(pod *Pod) ([]Node, error) {
 }
 
 func bind(pod *Pod, node Node) error {
+	// Constructs a Binding object which describes the operation of binding a pod to a node.
 	binding := Binding{
 		ApiVersion: "v1",
 		Kind:       "Binding",
@@ -352,6 +353,7 @@ func bind(pod *Pod, node Node) error {
 		},
 	}
 
+	// Encode Binding Object to JSON
 	var b []byte
 	body := bytes.NewBuffer(b)
 	err := json.NewEncoder(body).Encode(binding)
@@ -359,6 +361,8 @@ func bind(pod *Pod, node Node) error {
 		return err
 	}
 
+	// Prepare and Send HTTP Request
+	// URL: Constructs the URL for the API request, using apiHost and bindingsEndpoint
 	request := &http.Request{
 		Body:          ioutil.NopCloser(body),
 		ContentLength: int64(body.Len()),
