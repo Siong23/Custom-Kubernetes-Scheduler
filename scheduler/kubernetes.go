@@ -119,6 +119,7 @@ func watchUnscheduledPods() (<-chan Pod, <-chan error) {
 	}
 	request.Header.Set("Accept", "application/json, */*")
 
+	// The goroutine runs indefinitely, continuously watching for unscheduled pods and handling errors as they arise.
 	go func() {
 		for {
 			// Makes an HTTP request to the specified endpoint.
