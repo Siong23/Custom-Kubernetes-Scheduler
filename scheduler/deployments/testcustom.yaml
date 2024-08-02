@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -6,11 +6,13 @@ metadata:
   name: testcustom
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
   template:
     metadata:
       labels:
         app: nginx
-      name: nginx
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/path: '/data/metrics'
