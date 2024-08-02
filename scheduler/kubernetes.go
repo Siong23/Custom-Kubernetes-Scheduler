@@ -247,7 +247,7 @@ func fit(pod *Pod) ([]Node, error) {
 		resourceUsage[node.Metadata.Name] = &ResourceUsage{}
 	}
 
-	// 
+	// Calculate Current CPU Usage per Node
 	for _, p := range podList.Items {
 		if p.Spec.NodeName == "" {
 			continue
@@ -268,6 +268,7 @@ func fit(pod *Pod) ([]Node, error) {
 	var nodes []Node
 	fitFailures := make([]string, 0)
 
+	// Determine Required CPU for the New Pod
 	var spaceRequired int
 	for _, c := range pod.Spec.Containers {
 		if strings.HasSuffix(c.Resources.Requests["cpu"], "m") {
@@ -280,9 +281,12 @@ func fit(pod *Pod) ([]Node, error) {
 		}
 	}
 
+	// Filter Nodes Based on Available CPU
+	// For each node, calculate the allocatable CPU (handling both milliCores and non-milliCore values).
 	for _, node := range nodeList.Items {
 		var allocatableCores int
 		var err error
+		
 		if strings.HasSuffix(node.Status.Allocatable["cpu"], "m") {
 			milliCores := strings.TrimSuffix(node.Status.Allocatable["cpu"], "m")
 			allocatableCores, err = strconv.Atoi(milliCores)
@@ -298,6 +302,8 @@ func fit(pod *Pod) ([]Node, error) {
 			allocatableCores = int(cpuFloat * 1000)
 		}
 
+		// Nodes that do not have sufficient resources are recorded in fitFailures and 
+		// are not added to the list of suitable nodes.
 		freeSpace := (allocatableCores - resourceUsage[node.Metadata.Name].CPU)
 		if freeSpace < spaceRequired {
 			m := fmt.Sprintf("fit failure on node (%s): Insufficient CPU", node.Metadata.Name)
@@ -307,6 +313,7 @@ func fit(pod *Pod) ([]Node, error) {
 		nodes = append(nodes, node)
 	}
 
+	// If no nodes are suitable, it creates an Event object to record the scheduling failure.
 	if len(nodes) == 0 {
 		// Emit a Kubernetes event that the Pod was scheduled successfully.
 		timestamp := time.Now().UTC().Format(time.RFC3339)
