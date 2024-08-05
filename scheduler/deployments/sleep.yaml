@@ -12,13 +12,13 @@ spec:
       labels:
         app: sleep
     spec:
-      serviceAccount: default
+      serviceAccountName: default
       containers:
       - name: sleep
         image: tutum/curl
         command: ["/bin/sleep","infinity"]
         imagePullPolicy: IfNotPresent
         resources:
-                requests:
-                        memory: "1800Mi"
+          requests:
+            memory: "1800Mi"
 
