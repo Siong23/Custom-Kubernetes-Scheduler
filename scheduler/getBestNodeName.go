@@ -32,8 +32,8 @@ func getBestNodeName(nodes []Node) (string, error) {
 		nodeNames = append(nodeNames, n.Metadata.Name)
 	}
 
-	// Execute a query over the HTTP API to get the metric node_memory_MemAvailable
-	resp, err := http.Get("http://localhost:8080/api/v1/query?query=node_memory_MemAvailable")
+	// Execute a query over the HTTP API to get the metric node_memory_MemAvailable_bytes
+	resp, err := http.Get("http://localhost:9090/api/v1/query?query=node_memory_MemAvailable_bytes")
 	if err != nil {
 		fmt.Println(err)
 		return "", err
